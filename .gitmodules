@@ -1,0 +1,3 @@
+[submodule "third_party/yle-tekstitv"]
+	path = third_party/yle-tekstitv
+	url = https://github.com/Nykseli/yle-tekstitv

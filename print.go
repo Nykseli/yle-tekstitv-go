@@ -2,7 +2,7 @@ package main
 
 /*
 #cgo CFLAGS: -I./lib
-#cgo LDFLAGS: -L./lib -ltekstitv -Wl,-rpath=./lib
+#cgo LDFLAGS: -L./lib -ltekstitv -Wl,-rpath=./lib -lcurl
 #include "tekstitv.h"
 #include <stdlib.h>
 // Helper for finding the row index pointer
@@ -15,6 +15,8 @@ html_row* row_index_helper(html_row* row, int idx) {
 import "C"
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"unsafe"
 )
 
@@ -186,14 +188,27 @@ func printMiddle(parser *HTMLParser) {
 }
 
 func main() {
+	page := 100
+
+	args := os.Args
+
+	if len(args) > 1 {
+		page, _ = strconv.Atoi(args[1])
+	}
+
 	var parserStruct C.html_parser
 	C.init_html_parser(&parserStruct)
+	C.link_from_ints(&parserStruct, C.int(page), C.int(1))
 	C.load_page(&parserStruct)
 	C.parse_html(&parserStruct)
 
 	testH := cHTMLParser(&parserStruct)
-	printTitle(&testH)
-	printMiddle(&testH)
+	if testH.loadError {
+		fmt.Printf("Failed load the page\n")
+	} else {
+		printTitle(&testH)
+		printMiddle(&testH)
+	}
 
 	C.free_html_parser(&parserStruct)
 }
